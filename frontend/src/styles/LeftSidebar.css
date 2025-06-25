@@ -1,0 +1,146 @@
+.left-sidebar {
+  width: 300px;
+  background-color: #f7f7f7;
+  border-right: 1px solid #d1d1d1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  position: relative;
+  transition: width 0.3s ease;
+}
+
+.left-sidebar.collapsed {
+  width: 50px;
+}
+
+.sidebar-toggle-container {
+  padding: 10px;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.sidebar-toggle-btn {
+  background-color: transparent;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 8px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.sidebar-toggle-btn:hover {
+  background-color: #f0f0f0;
+}
+
+.search-container {
+  padding: 15px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+}
+
+.search-bar input {
+  flex: 1;
+  padding: 10px 15px;
+  border: 1px solid #e0e0e0;
+  border-radius: 20px;
+  outline: none;
+  color: #444444;
+  font-size: 14px;
+}
+
+.search-bar button {
+  background: none;
+  border: none;
+  margin-left: 10px;
+  cursor: pointer;
+  color: #777777;
+}
+
+.search-status {
+  padding: 20px 0;
+  text-align: center;
+  color: #888;
+  font-size: 15px;
+}
+
+.chat-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.chat-item {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.chat-item:hover {
+  background-color: #f9f9f9;
+}
+
+.chat-item.active {
+  background-color: #e0e0e0;
+}
+
+.chat-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #888888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 10px;
+  color: white;
+  font-weight: bold;
+}
+
+.chat-info {
+  flex: 1;
+}
+
+.chat-name {
+  font-weight: 600;
+  color: #444444;
+  margin-bottom: 3px;
+}
+
+.chat-preview {
+  font-size: 13px;
+  color: #777777;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.logout-container {
+  padding: 15px;
+  border-top: 1px solid #e0e0e0;
+  text-align: center;
+}
+
+.logout-btn {
+  background-color: #555555;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.logout-btn:hover {
+  background-color: #333333;
+}

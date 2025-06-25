@@ -1,0 +1,212 @@
+/* src/styles/auth.css */
+
+/* Reset and global box-sizing */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Base layout */
+.auth-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  padding: 1rem;
+}
+
+/* Card wrapper */
+.auth-form {
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  width: 100%;
+  max-width: 480px;
+  /* Removed fixed min-height to allow form to size naturally with content */
+  /* min-height: 400px; */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.4rem;
+  transition: transform 0.3s ease-out;
+}
+
+/* Optional: if you find hover lift jarring on mobile, you can comment this out */
+.auth-form:hover {
+  transform: translateY(-4px);
+}
+
+/* Header */
+.auth-header {
+  text-align: center;
+}
+
+.auth-header .chat-icon {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 1rem;
+  fill: #444444;
+}
+
+/* Floating-label fields */
+.form-group {
+  position: relative;
+  /* Add bottom margin so error messages do not overlap next field */
+  margin-bottom: 1.5rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1px solid #777777;
+  border-radius: 6px;
+  font-size: 1rem;
+  color: #333333;
+  background-color: #ffffff;
+  transition: border-color 0.4s, background-color 0.4s;
+}
+
+/* Hide placeholder text but use placeholder-shown for floating label logic */
+.form-group input::placeholder {
+  color: transparent;
+}
+
+/* Focus state */
+.form-group input:focus {
+  outline: none;
+  border-color: #555555;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(85, 85, 85, 0.2);
+}
+
+/* Floating label styling */
+.form-group label {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  font-size: 0.9rem;
+  color: #444444;
+  pointer-events: none;
+  transition: top 0.4s, left 0.4s, font-size 0.4s, color 0.4s;
+  background-color: #ffffff; /* Cover input border behind label */
+  padding: 0 0.25rem; /* Small horizontal padding */
+  z-index: 2; /* Place above input */
+}
+
+/* When input is focused or has content, float the label up */
+.form-group input:focus + label,
+.form-group input:not(:placeholder-shown) + label {
+  top: -8px;
+  left: 12px;
+  font-size: 0.75rem;
+  color: #555555;
+}
+
+/* Password toggle */
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.9rem;
+  color: #444444;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.3s;
+}
+
+.password-toggle:hover {
+  color: #222222;
+}
+
+/* Buttons */
+.submit-btn {
+  width: 100%;
+  padding: 0.85rem;
+  background-color: #444444;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+.submit-btn:hover:not(:disabled) {
+  background-color: #333333;
+  transform: translateY(-1px);
+}
+
+.submit-btn:disabled {
+  background-color: #666666;
+  cursor: not-allowed;
+}
+
+/* Error & Success Messages */
+/* 
+   Instead of negative margins, use a positive margin below the input.
+   .error-message is designed to appear under its input.
+*/
+.error-message {
+  color: #e74c3c; /* a clearer red for errors */
+  font-size: 0.85rem;
+  margin-top: 0.25rem; /* small spacing from input */
+  /* ensure it takes full width if needed */
+}
+
+/* If you want to highlight the input border when there is an error,
+   you can add a class "error" on .form-group in JSX, e.g. <div className={`form-group ${errors.field ? 'error' : ''}`}> 
+*/
+.form-group.error input {
+  border-color: #e74c3c;
+}
+
+.form-group.error label {
+  color: #e74c3c;
+}
+
+/* Success message (e.g., “Account created!”) */
+.success-message {
+  color: #0a7f2b;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+/* Switch auth */
+.toggle-auth {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #444444;
+}
+
+.toggle-auth button {
+  background: none;
+  border: none;
+  color: #444444;
+  cursor: pointer;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.toggle-auth button:hover {
+  color: #222222;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .auth-form {
+    max-width: 90%;
+    padding: 1.5rem;
+  }
+  .auth-header h1 {
+    font-size: 1.5rem;
+  }
+}

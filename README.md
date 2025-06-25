@@ -75,7 +75,7 @@ Follow these steps to get SlateChat running locally.
 
    ```bash
    git clone https://github.com/bsricharan14/chat-app.git
-   cd slatechat
+   cd chat-app
    ```
 
 2. **Install dependencies**

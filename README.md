@@ -54,9 +54,9 @@
 
 ## 🎬 Demo
 
-_A screenshot or link to a live demo can go here._
+soon!
 
-![SlateChat Screenshot](./docs/screenshot.png)
+<!-- ![SlateChat Screenshot](./docs/screenshot.png) -->
 
 ---
 
@@ -74,7 +74,7 @@ Follow these steps to get SlateChat running locally.
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yourusername/slatechat.git
+   git clone https://github.com/bsricharan14/chat-app.git
    cd slatechat
    ```
 

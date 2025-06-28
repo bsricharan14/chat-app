@@ -204,12 +204,12 @@ const LeftSidebar = ({ isCollapsed, toggleSidebar }) => {
                   </div>
                   <div className="chat-info">
                     <div className="chat-name">{chatUser.username}</div>
-                    <div className="chat-preview">
-                      {latestMessage
-                        ? `${latestMessage.sender === user._id ? "You: " : ""}${
-                            latestMessage.content
-                          }`
-                        : "No messages yet"}
+                    <div className="chat-preview" title={latestMessage?.content || ""}>
+                      {latestMessage?.content
+                        ? latestMessage.content.length > 30
+                          ? latestMessage.content.slice(0, 30) + "..."
+                          : latestMessage.content
+                        : ""}
                     </div>
                   </div>
                 </div>

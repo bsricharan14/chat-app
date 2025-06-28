@@ -22,6 +22,7 @@ app.use(express.json());
 // Routes: only authentication for now
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/left", require("./routes/leftRoutes"));
+app.use("/api/gemini", require("./routes/geminiRoutes"));
 
 // Health check or root
 app.get("/", (req, res) => {
@@ -37,7 +38,7 @@ const io = new Server(server, {
   },
 });
 
-const onlineUsers = new Set();
+const onlineUsers = new Map(); // userId -> Set of socketIds
 
 // Socket.IO logic
 io.on("connection", (socket) => {
@@ -49,14 +50,29 @@ io.on("connection", (socket) => {
   // When a user joins, they should emit their userId
   socket.on("userOnline", (userId) => {
     socket.userId = userId;
-    onlineUsers.add(userId);
+    if (!onlineUsers.has(userId)) onlineUsers.set(userId, new Set());
+    onlineUsers.get(userId).add(socket.id);
     io.emit("userStatus", { userId, status: "online" });
+    // Log online status with timestamp
+    console.log(
+      `[${new Date().toLocaleString()}] User ${userId} is ONLINE. Online users:`,
+      Array.from(onlineUsers.keys())
+    );
   });
 
   socket.on("disconnect", () => {
-    if (socket.userId) {
-      onlineUsers.delete(socket.userId);
-      io.emit("userStatus", { userId: socket.userId, status: "offline" });
+    const { userId } = socket;
+    if (userId && onlineUsers.has(userId)) {
+      onlineUsers.get(userId).delete(socket.id);
+      if (onlineUsers.get(userId).size === 0) {
+        onlineUsers.delete(userId);
+        io.emit("userStatus", { userId, status: "offline" });
+        // Log offline status with timestamp
+        console.log(
+          `[${new Date().toLocaleString()}] User ${userId} is OFFLINE. Online users:`,
+          Array.from(onlineUsers.keys())
+        );
+      }
     }
   });
 

@@ -7,13 +7,20 @@ import { useChat } from "../contexts/ChatContext";
 const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
   const socket = useSocket();
   const { user } = useAuth();
-  const { selectedChat } = useChat();
-  const [messages, setMessages] = useState([]);
+  const {
+    selectedChat,
+    selectedMessages,
+    setSelectedMessages,
+    selectionMode,
+    setSelectionMode,
+    selectingForSummary,
+    setSelectingForSummary,
+    messages,
+    setMessages,
+  } = useChat();
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState([]);
-  const [selectedMessages, setSelectedMessages] = useState([]);
-  const [selectionMode, setSelectionMode] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [contactOnline, setContactOnline] = useState(false);
   const messagesEndRef = useRef(null);
@@ -160,11 +167,11 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
   // Emit your online status on mount
   useEffect(() => {
     if (socket && user) {
+      socket.emit("join", user._id);
       socket.emit("userOnline", user._id);
     }
   }, [socket, user]);
 
-  // Listen for status changes
   useEffect(() => {
     if (!socket || !selectedChat) return;
     const handleUserStatus = ({ userId, status }) => {
@@ -197,7 +204,6 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
       )
     );
     setSelectedMessages([]);
-    setSelectionMode(false);
     // Emit delete event to server for real-time update
     socket.emit("deleteMessages", {
       messageIds: selectedMessages,
@@ -237,6 +243,8 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
       </div>
     );
   }
+
+  const groupedMessages = groupMessagesByDate(messages);
 
   return (
     <div
@@ -317,135 +325,133 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
       </div>
       {/* Fix: Remove inline overflowY and rely on CSS for scrolling */}
       <div className="chat-messages">
-        {(() => {
-          const grouped = groupMessagesByDate(messages);
-          return Object.keys(grouped).map((date) => (
-            <div key={date}>
-              <div className="date-label">{date}</div>
-              {grouped[date].map((msg) => {
-                const isSent = msg.sender === user._id;
-                return (
+        {Object.keys(groupedMessages).map((date) => (
+          <div key={date}>
+            <div className="date-label">{date}</div>
+            {groupedMessages[date].map((msg) => {
+              const isSent = msg.sender === user._id;
+              const showCheckbox =
+                selectingForSummary || (selectionMode && isSent);
+              return (
+                <div
+                  key={msg._id}
+                  className={`message ${isSent ? "sent" : "received"}${
+                    selectedMessages.includes(msg._id) ? " selected" : ""
+                  }`}
+                  style={{
+                    background: selectedMessages.includes(msg._id)
+                      ? "#f5f5f5"
+                      : undefined,
+                    position: "relative",
+                    flexDirection: isSent ? "row-reverse" : "row",
+                    alignItems: "center",
+                    display: "flex",
+                    gap: "8px",
+                  }}
+                >
+                  {showCheckbox && (
+                    <input
+                      type="checkbox"
+                      checked={selectedMessages.includes(msg._id)}
+                      onChange={() => toggleSelectMessage(msg._id)}
+                      className={`msg-checkbox left`}
+                      style={{ order: 0 }}
+                    />
+                  )}
                   <div
-                    key={msg._id}
-                    className={`message ${isSent ? "sent" : "received"}${
-                      selectedMessages.includes(msg._id) ? " selected" : ""
-                    }`}
                     style={{
-                      background: selectedMessages.includes(msg._id)
-                        ? "#f5f5f5"
-                        : undefined,
-                      position: "relative",
-                      flexDirection: isSent ? "row-reverse" : "row",
-                      alignItems: "center",
                       display: "flex",
-                      gap: "8px",
+                      flexDirection: "column",
+                      alignItems: isSent ? "flex-end" : "flex-start",
+                      flex: 1,
                     }}
                   >
-                    {/* Checkbox for selecting messages */}
-                    {isSent && selectionMode && (
-                      <input
-                        type="checkbox"
-                        checked={selectedMessages.includes(msg._id)}
-                        onChange={() => toggleSelectMessage(msg._id)}
-                        className={`msg-checkbox left`}
-                        style={{ order: 0 }}
-                      />
-                    )}
                     <div
                       style={{
                         display: "flex",
-                        flexDirection: "column",
-                        alignItems: isSent ? "flex-end" : "flex-start",
-                        flex: 1,
+                        alignItems: "center",
+                        gap: 6,
                       }}
                     >
                       <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 6,
-                        }}
+                        className="message-content"
+                        style={
+                          msg.deleted
+                            ? { fontStyle: "italic", color: "#b0b0b0" }
+                            : {}
+                        }
                       >
-                        <div
-                          className="message-content"
-                          style={
-                            msg.deleted
-                              ? { fontStyle: "italic", color: "#b0b0b0" }
-                              : {}
-                          }
-                        >
-                          {msg.deleted || msg.content === "[ deleted message ]"
-                            ? "[ deleted message ]"
-                            : msg.content}
-                        </div>
-                      </div>
-                      <div
-                        className="message-meta"
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 6,
-                          alignSelf: isSent ? "flex-end" : "flex-start",
-                          marginTop: "5px",
-                          marginBottom: "2px",
-                        }}
-                      >
-                        <span className="message-time">
-                          {new Date(msg.timestamp).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            hour12: true,
-                          })}
-                        </span>
-                        {isSent && !msg.deleted && (
-                          <span className="read-receipt">
-                            {msg.seen ? (
-                              // Double check for read
-                              <svg
-                                width="16"
-                                height="16"
-                                fill="#4caf50"
-                                viewBox="0 0 16 16"
-                              >
-                                <path
-                                  d="M1.5 8.5l4 4 9-9"
-                                  stroke="#4caf50"
-                                  strokeWidth="2"
-                                  fill="none"
-                                />
-                                <path
-                                  d="M5.5 8.5l2 2 5-5"
-                                  stroke="#4caf50"
-                                  strokeWidth="2"
-                                  fill="none"
-                                />
-                              </svg>
-                            ) : (
-                              // Single check for sent
-                              <svg
-                                width="16"
-                                height="16"
-                                fill="#888"
-                                viewBox="0 0 16 16"
-                              >
-                                <path
-                                  d="M1.5 8.5l4 4 9-9"
-                                  stroke="#888"
-                                  strokeWidth="2"
-                                  fill="none"
-                                />
-                              </svg>
-                            )}
-                          </span>
-                        )}
+                        {msg.deleted || msg.content === "[ deleted message ]"
+                          ? "[ deleted message ]"
+                          : msg.content}
                       </div>
                     </div>
+                    <div
+                      className="message-meta"
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 6,
+                        alignSelf: isSent ? "flex-end" : "flex-start",
+                        marginTop: "5px",
+                        marginBottom: "2px",
+                      }}
+                    >
+                      <span className="message-time">
+                        {new Date(msg.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          hour12: true,
+                        })}
+                      </span>
+                      {isSent && !msg.deleted && (
+                        <span className="read-receipt">
+                          {msg.seen ? (
+                            // Double check for read
+                            <svg
+                              width="16"
+                              height="16"
+                              fill="#4caf50"
+                              viewBox="0 0 16 16"
+                            >
+                              <path
+                                d="M1.5 8.5l4 4 9-9"
+                                stroke="#4caf50"
+                                strokeWidth="2"
+                                fill="none"
+                              />
+                              <path
+                                d="M5.5 8.5l2 2 5-5"
+                                stroke="#4caf50"
+                                strokeWidth="2"
+                                fill="none"
+                              />
+                            </svg>
+                          ) : (
+                            // Single check for sent
+                            <svg
+                              width="16"
+                              height="16"
+                              fill="#888"
+                              viewBox="0 0 16 16"
+                            >
+                              <path
+                                d="M1.5 8.5l4 4 9-9"
+                                stroke="#888"
+                                strokeWidth="2"
+                                fill="none"
+                              />
+                            </svg>
+                          )}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                );
-              })}
-            </div>
-          ));
-        })()}
+                </div>
+              );
+            })}
+          </div>
+        ))}
         {typingUsers.includes(selectedChat._id) && (
           <div className="typing-indicator">Typing...</div>
         )}

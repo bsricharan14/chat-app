@@ -97,6 +97,10 @@
   margin-right: auto;
 }
 
+.message.selected {
+  background: #e3f2fd;
+}
+
 .message-content {
   padding: 10px 15px;
   border-radius: 15px;

@@ -80,25 +80,42 @@
   background-color: #f9f9f9;
 }
 
+/* Message container */
 .message {
-  margin-bottom: 15px;
+  background: none;
+  position: relative;
   display: flex;
-  flex-direction: column;
-  max-width: 70%;
+  gap: 8px;
+  margin-bottom: 15px;
+  flex-direction: row;
 }
 
 .message.sent {
-  align-items: flex-end;
-  margin-left: auto;
-}
-
-.message.received {
-  align-items: flex-start;
-  margin-right: auto;
+  flex-direction: row-reverse;
 }
 
 .message.selected {
-  background: #e3f2fd;
+  background: #f5f5f5;
+}
+
+.message-col {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.message-col.align-end {
+  align-items: flex-end;
+}
+
+.message-col.align-start {
+  align-items: flex-start;
+}
+
+.message-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .message-content {
@@ -107,6 +124,27 @@
   font-size: 14px;
   line-height: 1.4;
   word-wrap: break-word;
+}
+
+.message-content.deleted {
+  font-style: italic;
+  color: #b0b0b0;
+}
+
+.message-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 5px;
+  margin-bottom: 2px;
+}
+
+.message-meta.align-end {
+  align-self: flex-end;
+}
+
+.message-meta.align-start {
+  align-self: flex-start;
 }
 
 .message.sent .message-content {
@@ -119,15 +157,6 @@
   background-color: #e0e0e0;
   color: #444444;
   border-bottom-left-radius: 5px;
-}
-
-.message-meta {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  align-self: flex-end;
-  margin-top: 5px;
-  margin-bottom: 2px;
 }
 
 .message-time {

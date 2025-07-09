@@ -24,6 +24,7 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [contactOnline, setContactOnline] = useState(false);
   const messagesEndRef = useRef(null);
+  const typingTimeoutRef = useRef();
 
   // Fetch messages when selectedChat changes
   useEffect(() => {
@@ -107,42 +108,56 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
   useEffect(() => {
     if (!socket || !selectedChat || !user) return;
 
-    let typingTimeout;
+    const inputElem = document.querySelector(".message-input");
+    if (!inputElem) return;
 
     const handleInput = (e) => {
       setInput(e.target.value);
+
+      // Always emit stopTyping if input is empty
+      if (e.target.value.trim() === "") {
+        setIsTyping(false);
+        socket.emit("stopTyping", { to: selectedChat._id, from: user._id });
+        clearTimeout(typingTimeoutRef.current);
+        return;
+      }
+
       if (!isTyping) {
         setIsTyping(true);
         socket.emit("typing", { to: selectedChat._id, from: user._id });
       }
-      clearTimeout(typingTimeout);
-      typingTimeout = setTimeout(() => {
+      clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(() => {
         setIsTyping(false);
         socket.emit("stopTyping", { to: selectedChat._id, from: user._id });
-      }, 1200);
+      }, 1000); // 1 second after last keypress
     };
 
-    const inputElem = document.querySelector(".message-input");
-    if (inputElem) {
-      inputElem.addEventListener("input", handleInput);
-    }
+    inputElem.addEventListener("input", handleInput);
 
     return () => {
-      if (inputElem) inputElem.removeEventListener("input", handleInput);
-      clearTimeout(typingTimeout);
+      inputElem.removeEventListener("input", handleInput);
+      clearTimeout(typingTimeoutRef.current);
     };
   }, [socket, selectedChat, user, isTyping]);
 
-  // Listen for typing events
+  // Listen for typing events from the other user
   useEffect(() => {
     if (!socket || !selectedChat) return;
 
+    let otherTypingTimeout;
     const handleTyping = ({ from }) => {
-      if (from === selectedChat._id)
+      if (from === selectedChat._id) {
         setTypingUsers((prev) => [...new Set([...prev, from])]);
+        clearTimeout(otherTypingTimeout);
+        otherTypingTimeout = setTimeout(() => {
+          setTypingUsers((prev) => prev.filter((id) => id !== from));
+        }, 1500); // Hide after 1.5s of no typing event
+      }
     };
     const handleStopTyping = ({ from }) => {
       setTypingUsers((prev) => prev.filter((id) => id !== from));
+      clearTimeout(otherTypingTimeout);
     };
 
     socket.on("typing", handleTyping);
@@ -151,6 +166,7 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
     return () => {
       socket.off("typing", handleTyping);
       socket.off("stopTyping", handleStopTyping);
+      clearTimeout(otherTypingTimeout);
     };
   }, [socket, selectedChat]);
 
@@ -338,16 +354,6 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
                   className={`message ${isSent ? "sent" : "received"}${
                     selectedMessages.includes(msg._id) ? " selected" : ""
                   }`}
-                  style={{
-                    background: selectedMessages.includes(msg._id)
-                      ? "#f5f5f5"
-                      : undefined,
-                    position: "relative",
-                    flexDirection: isSent ? "row-reverse" : "row",
-                    alignItems: "center",
-                    display: "flex",
-                    gap: "8px",
-                  }}
                 >
                   {showCheckbox && (
                     <input
@@ -355,48 +361,19 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
                       checked={selectedMessages.includes(msg._id)}
                       onChange={() => toggleSelectMessage(msg._id)}
                       className={`msg-checkbox left`}
-                      style={{ order: 0 }}
                     />
                   )}
-                  <div
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: isSent ? "flex-end" : "flex-start",
-                      flex: 1,
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                      }}
-                    >
+                  <div className={`message-col ${isSent ? "align-end" : "align-start"}`}>
+                    <div className="message-row">
                       <div
-                        className="message-content"
-                        style={
-                          msg.deleted
-                            ? { fontStyle: "italic", color: "#b0b0b0" }
-                            : {}
-                        }
+                        className={`message-content${msg.deleted || msg.content === "[ deleted message ]" ? " deleted" : ""}`}
                       >
                         {msg.deleted || msg.content === "[ deleted message ]"
                           ? "[ deleted message ]"
                           : msg.content}
                       </div>
                     </div>
-                    <div
-                      className="message-meta"
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 6,
-                        alignSelf: isSent ? "flex-end" : "flex-start",
-                        marginTop: "5px",
-                        marginBottom: "2px",
-                      }}
-                    >
+                    <div className={`message-meta ${isSent ? "align-end" : "align-start"}`}>
                       <span className="message-time">
                         {new Date(msg.timestamp).toLocaleTimeString([], {
                           hour: "2-digit",
@@ -477,9 +454,13 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
           </svg>
         </button>
       </form>
-      {selectionMode && selectedMessages.length > 0 && (
+      {selectionMode && (
         <div className="delete-actions-bar">
-          <button onClick={handleDeleteMessages} className="delete-btn">
+          <button
+            onClick={handleDeleteMessages}
+            className="delete-btn"
+            disabled={selectedMessages.length === 0}
+          >
             Delete Selected
           </button>
           <button

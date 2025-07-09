@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "../styles/RightSidebar.css";
 import { useChat } from "../contexts/ChatContext";
+import { useAuth } from "../contexts/AuthContext";
 
 const RightSidebar = ({ isCollapsed, toggleSidebar }) => {
   const [showSummary, setShowSummary] = useState(false);
@@ -16,6 +17,9 @@ const RightSidebar = ({ isCollapsed, toggleSidebar }) => {
     selectingForSummary,
     setSelectingForSummary,
   } = useChat();
+  const { user, setUser } = useAuth();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Enable selection mode in ChatWindow for summary
   const handleStartSummary = () => {
@@ -106,6 +110,41 @@ const RightSidebar = ({ isCollapsed, toggleSidebar }) => {
     }
   };
 
+  // Helper to check if last message is from the other user
+  const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null;
+  const isLastMsgFromOther =
+    lastMessage && lastMessage.sender && lastMessage.sender !== (user && user._id);
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true);
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(
+        `${process.env.REACT_APP_API_URL}/api/auth/delete-account`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (res.ok) {
+        // Log out and redirect
+        localStorage.removeItem("token");
+        localStorage.removeItem("chat-user");
+        setUser(null);
+        window.location.href = "/login";
+      } else {
+        setDeleting(false);
+        alert("Failed to delete account.");
+      }
+    } catch {
+      setDeleting(false);
+      alert("Server error.");
+    }
+  };
+
   return (
     <div className={`right-sidebar ${isCollapsed ? "collapsed" : ""}`}>
       <div className="sidebar-toggle-container">
@@ -153,36 +192,35 @@ const RightSidebar = ({ isCollapsed, toggleSidebar }) => {
                   {selectingForSummary ? (
                     <div className="ai-tool-prompt">
                       Select messages in chat, then click Generate.
-                      <button
-                        className="ai-tool-btn"
-                        style={{ marginTop: 10 }}
-                        disabled={!selectedMessages.length}
-                        onClick={handleGenerateSummary}
-                      >
-                        {summaryLoading ? "Generating..." : "Generate Summary"}
-                      </button>
-                      <button
-                        className="ai-tool-btn cancel-btn"
-                        style={{ marginTop: 10, background: "#fff", color: "#888", border: "1px solid #ccc" }}
-                        onClick={handleCancelSummary}
-                        disabled={summaryLoading}
-                      >
-                        Cancel
-                      </button>
+                      <div className="ai-tool-btn-row">
+                        <button
+                          className="ai-tool-btn"
+                          disabled={!selectedMessages.length}
+                          onClick={handleGenerateSummary}
+                        >
+                          {summaryLoading ? "Generating..." : "Generate"}
+                        </button>
+                        <button
+                          className="ai-tool-btn cancel-btn"
+                          onClick={handleCancelSummary}
+                          disabled={summaryLoading}
+                        >
+                          Cancel
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <div className="ai-tool-result">
                       {summaryLoading ? "Generating..." : summary}
-                      <button
-                        className="ai-tool-btn"
-                        style={{ marginTop: 10 }}
-                        onClick={handleRefreshSummary}
-                        disabled={summaryLoading}
-                      >
-                        Refresh
-                      </button>
                     </div>
                   )}
+                  <button
+                    className="ai-tool-btn ai-tool-refresh-btn"
+                    onClick={handleRefreshSummary}
+                    disabled={summaryLoading}
+                  >
+                    Refresh
+                  </button>
                 </>
               )}
             </div>
@@ -193,45 +231,103 @@ const RightSidebar = ({ isCollapsed, toggleSidebar }) => {
                 Get AI-generated responses to the last message
               </div>
               {!showReply && (
-                <button className="ai-tool-btn" onClick={handleStartReply}>
+                <button
+                  className="ai-tool-btn"
+                  onClick={handleStartReply}
+                  disabled={!isLastMsgFromOther}
+                  title={
+                    !lastMessage
+                      ? "No messages in this chat"
+                      : !isLastMsgFromOther
+                      ? "No recent message from the other user"
+                      : ""
+                  }
+                >
                   Start Reply Suggestion
                 </button>
               )}
               {showReply && (
                 <>
-                  <button
-                    className="ai-tool-btn"
-                    style={{ marginTop: 10 }}
-                    onClick={handleGenerateReply}
-                  >
-                    {replyLoading ? "Generating..." : "Generate Reply"}
-                  </button>
-                  <div className="ai-tool-result">
-                    {replyLoading
-                      ? "Generating..."
-                      : replies.map((r, i) => (
-                          <button
-                            key={i}
-                            className="ai-reply-option"
-                            onClick={() => handleInsertReply(r)}
-                          >
-                            {r}
-                          </button>
-                        ))}
-                    {!replyLoading && replies.length > 0 && (
+                  {!isLastMsgFromOther ? (
+                    <div className="ai-tool-prompt" style={{ color: "#b00", marginTop: 10 }}>
+                      {messages.length === 0
+                        ? "No messages to reply to."
+                        : "No recent message from the other user."}
+                    </div>
+                  ) : (
+                    <>
                       <button
                         className="ai-tool-btn"
                         style={{ marginTop: 10 }}
-                        onClick={handleRefreshReply}
+                        onClick={handleGenerateReply}
+                        disabled={replyLoading}
                       >
-                        Refresh
+                        {replyLoading ? "Generating..." : "Generate Reply"}
                       </button>
-                    )}
-                  </div>
+                      <div className="ai-tool-result">
+                        {replyLoading
+                          ? "Generating..."
+                          : replies.length === 0
+                          ? "No reply generated."
+                          : replies.map((r, i) => (
+                              <button
+                                key={i}
+                                className="ai-reply-option"
+                                onClick={() => handleInsertReply(r)}
+                              >
+                                {r}
+                              </button>
+                            ))}
+                      </div>
+                      {!replyLoading && replies.length > 0 && (
+                        <button
+                          className="ai-tool-btn ai-tool-refresh-btn"
+                          onClick={handleRefreshReply}
+                        >
+                          Refresh
+                        </button>
+                      )}
+                    </>
+                  )}
                 </>
               )}
             </div>
           </div>
+          <div style={{ marginTop: "auto", padding: "18px 16px 20px 16px" }}>
+            <button
+              className="delete-account-btn"
+              onClick={() => setShowDeleteModal(true)}
+            >
+              Delete Account
+            </button>
+          </div>
+          {showDeleteModal && (
+            <div className="delete-modal-overlay">
+              <div className="delete-modal">
+                <div className="delete-modal-title">Delete Account</div>
+                <div className="delete-modal-text">
+                  Are you sure you want to delete your account? <br />
+                  <b>This action cannot be undone.</b>
+                </div>
+                <div className="delete-modal-actions">
+                  <button
+                    className="delete-modal-confirm"
+                    onClick={handleDeleteAccount}
+                    disabled={deleting}
+                  >
+                    {deleting ? "Deleting..." : "Confirm"}
+                  </button>
+                  <button
+                    className="delete-modal-cancel"
+                    onClick={() => setShowDeleteModal(false)}
+                    disabled={deleting}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>

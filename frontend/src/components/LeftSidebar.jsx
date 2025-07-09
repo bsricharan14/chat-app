@@ -140,6 +140,11 @@ const LeftSidebar = ({ isCollapsed, toggleSidebar }) => {
           >
             SlateChat
           </div>
+          {user && (
+            <div className="left-username"  >
+              Hi, {user.username}
+            </div>
+          )}
           <div className="search-container">
             <form className="search-bar" onSubmit={handleSearch}>
               <input

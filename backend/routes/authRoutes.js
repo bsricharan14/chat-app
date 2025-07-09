@@ -3,6 +3,7 @@ const express = require("express");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
 const User = require("../models/User");
+const auth = require("../middleware/authmiddleware");
 require("dotenv").config();
 
 // Helper to generate JWT
@@ -84,6 +85,22 @@ router.post("/login", async (req, res) => {
     res.status(200).json({ user: userToReturn, token });
   } catch (err) {
     console.error("Login Error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// DELETE /api/auth/delete-account
+router.delete("/delete-account", auth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      console.log("User not found");
+      return res.status(404).json({ message: "User not found" });
+    }
+    await user.remove();
+    res.json({ message: "Account deleted" });
+  } catch (err) {
+    console.error("Delete account error:", err);
     res.status(500).json({ message: "Server error" });
   }
 });

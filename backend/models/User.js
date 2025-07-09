@@ -37,5 +37,18 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
+// Delete all messages where this user is sender or receiver when user is removed
+userSchema.pre("remove", async function (next) {
+  try {
+    const Message = require("./Message");
+    await Message.deleteMany({
+      $or: [{ sender: this._id }, { receiver: this._id }],
+    });
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
+
 const User = mongoose.model("User", userSchema);
 module.exports = User;

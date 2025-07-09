@@ -30,9 +30,15 @@ async function callGemini(messages, prompt) {
 
 // POST /api/gemini/recommend-reply
 router.post("/recommend-reply", async (req, res) => {
-  const { messages, n } = req.body;
+  const { messages } = req.body;
   try {
-    const prompt = "Suggest a concise, friendly reply to the last message in this chat:";
+    // Strict prompt: no intro, just 3 numbered replies
+    const prompt = `Suggest exactly 3 concise, friendly replies to the last message in this chat. 
+Reply ONLY with a numbered list, no introduction or explanation, like:
+1. First reply
+2. Second reply
+3. Third reply`;
+
     const body = {
       contents: [
         {
@@ -42,7 +48,7 @@ router.post("/recommend-reply", async (req, res) => {
           ]
         }
       ],
-      generationConfig: { candidateCount: n || 3 }
+      generationConfig: { candidateCount: 1 }
     };
     const geminiRes = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: "POST",
@@ -54,13 +60,25 @@ router.post("/recommend-reply", async (req, res) => {
     // LOG THE FULL RESPONSE
     console.log("Gemini recommend-reply response:", JSON.stringify(data, null, 2));
 
-    const replies = (data?.candidates || []).map(
-      c => c?.content?.parts?.[0]?.text || ""
-    ).filter(Boolean);
+    // Strictly extract only lines starting with 1. 2. 3. and remove quotes
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    let replies = [];
+    for (const line of text.split('\n')) {
+      const match = line.match(/^\s*\d+\.\s*(.*)$/);
+      if (match && match[1]) {
+        // Remove leading/trailing quotes and whitespace
+        let reply = match[1].trim().replace(/^"+|"+$/g, "");
+        if (reply) replies.push(reply);
+      }
+      if (replies.length === 3) break;
+    }
+    // Ensure exactly 3 replies
+    while (replies.length < 3) replies.push("...");
+
     res.json({ replies });
   } catch (err) {
     console.error("Gemini recommend-reply error:", err);
-    res.status(500).json({ replies: ["Gemini API error"] });
+    res.status(500).json({ replies: ["Gemini API error", "Gemini API error", "Gemini API error"] });
   }
 });
 

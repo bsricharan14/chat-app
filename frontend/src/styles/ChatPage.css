@@ -1,22 +1,37 @@
 .chat-container {
   display: flex;
-  width: 100%;
+  width: 100vw;
   height: 100vh;
   background-color: white;
 }
 
-/* Make chat window expand when sidebars are collapsed */
+.left-sidebar {
+  width: 300px;
+  min-width: 50px;
+  max-width: 300px;
+  transition: width 0.3s;
+}
+
+.left-sidebar.collapsed {
+  width: 50px;
+}
+
 .chat-window {
-  flex: 1;
-  transition: margin 0.3s ease;
+  flex: 1 1 0%;
+  min-width: 0;
+  margin: 0;
+  transition: none;
+  height: 100vh;
+  background: #f7f7f7;
 }
 
-.left-sidebar.collapsed ~ .chat-window {
-  margin-left: 50px;
+.right-sidebar {
+  width: 270px;
+  transition: width 0.3s;
 }
 
-.right-sidebar.collapsed ~ .chat-window {
-  margin-right: 50px;
+.right-sidebar.collapsed {
+  width: 50px;
 }
 
 @media (max-width: 768px) {

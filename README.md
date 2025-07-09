@@ -1,9 +1,9 @@
 # SlateChat
 
-[![Project Status](https://img.shields.io/badge/status-in__development-yellow)](https://github.com/yourusername/slatechat)
+[![Project Status](https://img.shields.io/badge/status-work__in__progress-orange)](https://github.com/yourusername/slatechat)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-> **SlateChat** is a modern, real-time chat application built with the MERN stack and Socket.IO. It offers secure user authentication, live messaging, and a responsive, user-friendly interface.
+> **SlateChat** is a modern, real-time chat application built with the MERN stack and Socket.IO. It offers secure user authentication, live messaging, AI-powered chat features, and a responsive, user-friendly interface.
 
 ---
 
@@ -11,14 +11,11 @@
 
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
-- [Demo](#-demo)
 - [Getting Started](#-getting-started)
-
   - [Prerequisites](#prerequisites)
   - [Installation](#installation)
   - [Environment Variables](#environment-variables)
   - [Running the Application](#running-the-application)
-
 - [Usage](#-usage)
 - [Folder Structure](#-folder-structure)
 - [Contributing](#-contributing)
@@ -30,13 +27,16 @@
 ## 🚀 Features
 
 - **User Authentication**: Register and log in with JWT-based sessions.
-- **Real-Time Messaging**: One-to-one chat powered by Socket.IO.
+- **Real-Time Chatting**: One-to-one chat powered by Socket.IO for instant message delivery.
 - **Online/Offline Indicators**: See who’s available at a glance.
 - **Read Receipts**: Know when your messages have been seen.
 - **Message Deletion**: Delete messages with a `[deleted message]` placeholder.
 - **Date Grouping**: Chats grouped by day with date labels.
 - **Responsive UI**: Optimized for desktop and mobile screens.
 - **Sidebar**: Recent chats list with search functionality.
+- **AI Suggested Replies**: Get instant, context-aware reply suggestions powered by Google Gemini API.
+- **Chat Summarisation**: Summarise selected chat messages using Gemini for quick overviews.
+- **Account Management**: Delete your account and all related messages securely.
 
 ---
 
@@ -47,16 +47,9 @@
 | Frontend       | React, Context API, CSS             |
 | Backend        | Node.js, Express, MongoDB, Mongoose |
 | Real-time      | Socket.IO                           |
+| AI Integration | Google Gemini API                   |
 | Authentication | JSON Web Tokens (JWT)               |
-| Deployment     | Docker (optional), Heroku / Vercel  |
-
----
-
-## 🎬 Demo
-
-soon!
-
-<!-- ![SlateChat Screenshot](./docs/screenshot.png) -->
+| Deployment     | Yet to be done                      |
 
 ---
 
@@ -100,6 +93,7 @@ Create a `.env` file in the `backend` and `frontend` directories with the follow
   MONGO_URI=mongodb://localhost:27017/chat-app
   JWT_SECRET=your_jwt_secret
   PORT=5000
+  GEMINI_API_KEY=your_gemini_api_key
   ```
 
 - **frontend/.env**
@@ -134,7 +128,8 @@ Create a `.env` file in the `backend` and `frontend` directories with the follow
 1. Register a new account or log in with existing credentials.
 2. Select a contact from the sidebar or search for a user.
 3. Start chatting in real time, view online status, and manage your messages.
-4. Delete messages or view read receipts as needed.
+4. Use AI-powered reply suggestions and chat summarisation for enhanced productivity.
+5. Delete messages or your account as needed.
 
 ---
 
@@ -143,18 +138,17 @@ Create a `.env` file in the `backend` and `frontend` directories with the follow
 ```
 slatechat/
 ├── backend/               # Express server, API routes, and Socket.IO setup
-│   ├── controllers/
+│   ├── config/
+│   ├── middleware/
 │   ├── models/
 │   ├── routes/
-│   ├── middleware/
-│   ├── utils/
 │   ├── server.js
 │   └── .env
 ├── frontend/              # React app with Context API and CSS modules
 │   ├── public/
 │   ├── src/
 │   │   ├── components/
-│   │   ├── context/
+│   │   ├── contexts/
 │   │   ├── pages/
 │   │   ├── styles/
 │   │   └── App.js
@@ -191,7 +185,8 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 - [MongoDB](https://www.mongodb.com/)
 - [Express](https://expressjs.com/)
 - [Mongoose](https://mongoosejs.com/)
+- [Google Gemini API](https://ai.google.dev/)
 
 ---
 
-_Happy coding!_
+_Work in progress — new features and improvements coming soon!_

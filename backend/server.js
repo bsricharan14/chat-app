@@ -61,11 +61,6 @@ io.on("connection", (socket) => {
     if (!onlineUsers.has(userId)) onlineUsers.set(userId, new Set());
     onlineUsers.get(userId).add(socket.id);
     io.emit("userStatus", { userId, status: "online" });
-    // Log online status with timestamp
-    console.log(
-      `[${new Date().toLocaleString()}] User ${userId} is ONLINE. Online users:`,
-      Array.from(onlineUsers.keys())
-    );
   });
 
   // Emit the current online users to the newly connected client
@@ -78,11 +73,6 @@ io.on("connection", (socket) => {
       if (onlineUsers.get(userId).size === 0) {
         onlineUsers.delete(userId);
         io.emit("userStatus", { userId, status: "offline" });
-        // Log offline status with timestamp
-        console.log(
-          `[${new Date().toLocaleString()}] User ${userId} is OFFLINE. Online users:`,
-          Array.from(onlineUsers.keys())
-        );
       }
     }
   });

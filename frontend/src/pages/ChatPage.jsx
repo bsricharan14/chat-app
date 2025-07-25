@@ -2,9 +2,13 @@ import React, { useState } from "react";
 import LeftSidebar from "../components/LeftSidebar";
 import ChatWindow from "../components/ChatWindow";
 import RightSidebar from "../components/RightSidebar";
+import { useEffect } from "react";
 import "../styles/ChatPage.css";
 
 const ChatPage = () => {
+  useEffect(() => {
+    document.title = "SlateChat | Chat";
+  }, []);
   const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(false);
   const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(false);
 

@@ -3,6 +3,7 @@ import { useAuth } from "./contexts/AuthContext";
 import { Routes, Route, Navigate } from "react-router-dom";
 import AuthPage from "./pages/AuthPage";
 import ChatPage from "./pages/ChatPage";
+import { OnlineUsersProvider } from "./contexts/OnlineUsersContext";
 
 function App() {
   const { user, setUser } = useAuth();
@@ -20,38 +21,40 @@ function App() {
   };
 
   return (
-    <Routes>
-      <Route
-        path="/login"
-        element={
-          !user ? (
-            <AuthPage onLogin={handleLogin} />
-          ) : (
-            <Navigate to="/chat" replace />
-          )
-        }
-      />
-      <Route
-        path="/chat"
-        element={
-          user ? (
-            <ChatPage onLogout={handleLogout} />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-      <Route
-        path="*"
-        element={
-          user ? (
-            <Navigate to="/chat" replace />
-          ) : (
-            <Navigate to="/login" replace />
-          )
-        }
-      />
-    </Routes>
+    <OnlineUsersProvider>
+      <Routes>
+        <Route
+          path="/login"
+          element={
+            !user ? (
+              <AuthPage onLogin={handleLogin} />
+            ) : (
+              <Navigate to="/chat" replace />
+            )
+          }
+        />
+        <Route
+          path="/chat"
+          element={
+            user ? (
+              <ChatPage onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+        <Route
+          path="*"
+          element={
+            user ? (
+              <Navigate to="/chat" replace />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+      </Routes>
+    </OnlineUsersProvider>
   );
 }
 

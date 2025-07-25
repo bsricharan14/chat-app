@@ -57,9 +57,6 @@ Reply ONLY with a numbered list, no introduction or explanation, like:
     });
     const data = await geminiRes.json();
 
-    // LOG THE FULL RESPONSE
-    console.log("Gemini recommend-reply response:", JSON.stringify(data, null, 2));
-
     // Strictly extract only lines starting with 1. 2. 3. and remove quotes
     const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
     let replies = [];
@@ -103,9 +100,6 @@ router.post("/summarize", async (req, res) => {
       body: JSON.stringify(body)
     });
     const data = await geminiRes.json();
-
-    // LOG THE FULL RESPONSE
-    console.log("Gemini summarize response:", JSON.stringify(data, null, 2));
 
     const summary = data?.candidates?.[0]?.content?.parts?.[0]?.text || "No summary generated.";
     res.json({ summary });

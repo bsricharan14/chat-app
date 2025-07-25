@@ -3,6 +3,7 @@ import "../styles/ChatWindow.css";
 import { useSocket } from "../contexts/SocketContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useChat } from "../contexts/ChatContext";
+import { useOnlineUsers } from "../contexts/OnlineUsersContext";
 
 const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
   const socket = useSocket();
@@ -18,11 +19,13 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
     messages,
     setMessages,
   } = useChat();
+  const onlineUsers = useOnlineUsers();
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [typingUsers, setTypingUsers] = useState([]);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [contactOnline, setContactOnline] = useState(false);
+  const [editMode, setEditMode] = useState(false);
+  const [editValue, setEditValue] = useState("");
   const messagesEndRef = useRef(null);
   const typingTimeoutRef = useRef();
 
@@ -188,21 +191,14 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
     }
   }, [socket, user]);
 
-  useEffect(() => {
-    if (!socket || !selectedChat) return;
-    const handleUserStatus = ({ userId, status }) => {
-      if (userId === selectedChat._id) {
-        setContactOnline(status === "online");
-      }
-    };
-    socket.on("userStatus", handleUserStatus);
-    return () => socket.off("userStatus", handleUserStatus);
-  }, [socket, selectedChat]);
+  const contactOnline =
+    selectedChat && onlineUsers.includes(selectedChat._id);
 
   // Utility to group messages by date (returns {date: [messages]})
   const groupMessagesByDate = (messages) => {
     return messages.reduce((groups, msg) => {
-      const date = new Date(msg.timestamp).toLocaleDateString();
+      const dateObj = new Date(msg.timestamp);
+      const date = `${String(dateObj.getDate()).padStart(2, "0")}/${String(dateObj.getMonth() + 1).padStart(2, "0")}/${dateObj.getFullYear()}`;
       if (!groups[date]) groups[date] = [];
       groups[date].push(msg);
       return groups;
@@ -215,7 +211,7 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
     setMessages((prev) =>
       prev.map((msg) =>
         selectedMessages.includes(msg._id)
-          ? { ...msg, content: "[ deleted message ]", deleted: true }
+          ? { ...msg, content: "[ deleted message ]", deleted: true, edited: false }
           : msg
       )
     );
@@ -241,7 +237,7 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
       setMessages((prev) =>
         prev.map((msg) =>
           messageIds.includes(msg._id)
-            ? { ...msg, content: "[ deleted message ]", deleted: true }
+            ? { ...msg, content: "[ deleted message ]", deleted: true, edited: false }
             : msg
         )
       );
@@ -249,6 +245,24 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
     socket.on("messagesDeleted", handleMessagesDeleted);
     return () => {
       socket.off("messagesDeleted", handleMessagesDeleted);
+    };
+  }, [socket]);
+
+  // Listen for edited messages from server
+  useEffect(() => {
+    if (!socket) return;
+    const handleEditMessage = (updatedMsg) => {
+      setMessages((prev) =>
+        prev.map((m) =>
+          m._id === updatedMsg._id
+            ? { ...m, content: updatedMsg.content, edited: true }
+            : m
+        )
+      );
+    };
+    socket.on("editMessage", handleEditMessage);
+    return () => {
+      socket.off("editMessage", handleEditMessage);
     };
   }, [socket]);
 
@@ -374,6 +388,12 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
                       </div>
                     </div>
                     <div className={`message-meta ${isSent ? "align-end" : "align-start"}`}>
+                      {isSent && msg.edited && (
+                        <>
+                          <span className="edited-tag">edited</span>
+                          <span className="dot-separator" style={{ margin: "0 4px", color: "#888" }}>&#8226;</span>
+                        </>
+                      )}
                       <span className="message-time">
                         {new Date(msg.timestamp).toLocaleTimeString([], {
                           hour: "2-digit",
@@ -381,6 +401,12 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
                           hour12: true,
                         })}
                       </span>
+                      {!isSent && msg.edited && (
+                        <>
+                          <span className="dot-separator" style={{ margin: "0 4px", color: "#888" }}>&#8226;</span>
+                          <span className="edited-tag">edited</span>
+                        </>
+                      )}
                       {isSent && !msg.deleted && (
                         <span className="read-receipt">
                           {msg.seen ? (
@@ -463,6 +489,21 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
           >
             Delete Selected
           </button>
+          {selectedMessages.length === 1 && (() => {
+            const msg = messages.find(m => m._id === selectedMessages[0]);
+            return msg && msg.sender === user._id;
+          })() && (
+            <button
+              onClick={() => {
+                const msg = messages.find(m => m._id === selectedMessages[0]);
+                setEditValue(msg.content);
+                setEditMode(true);
+              }}
+              className="update-btn"
+            >
+              Update
+            </button>
+          )}
           <button
             onClick={() => {
               setSelectedMessages([]);
@@ -472,6 +513,65 @@ const ChatWindow = ({ leftSidebarCollapsed, rightSidebarCollapsed }) => {
           >
             Cancel
           </button>
+        </div>
+      )}
+      {editMode && (
+        <div className="edit-modal-overlay">
+          <div className="edit-modal">
+            <div className="edit-modal-title">Edit Message</div>
+            <textarea
+              className="edit-modal-input"
+              value={editValue}
+              onChange={e => setEditValue(e.target.value)}
+              rows={3}
+              autoFocus
+            />
+            <div className="edit-modal-actions">
+              <button
+                className="edit-modal-confirm"
+                onClick={async () => {
+                  const msgId = selectedMessages[0];
+                  const token = localStorage.getItem("token");
+                  const res = await fetch(
+                    `${process.env.REACT_APP_API_URL}/api/left/edit-message/${msgId}`,
+                    {
+                      method: "PUT",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                      },
+                      body: JSON.stringify({ content: editValue }),
+                    }
+                  );
+                  if (res.ok) {
+                    const updated = await res.json();
+                    setMessages(prev =>
+                      prev.map(m =>
+                        m._id === updated._id
+                          ? { ...m, content: updated.content, edited: true }
+                          : m
+                      )
+                    );
+                    setEditMode(false);
+                    setSelectionMode(false);
+                    setSelectedMessages([]);
+                    // Optionally emit socket event for real-time update
+                    if (socket) {
+                      socket.emit("editMessage", updated);
+                    }
+                  }
+                }}
+              >
+                Save
+              </button>
+              <button
+                className="edit-modal-cancel"
+                onClick={() => setEditMode(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

@@ -1,5 +1,5 @@
 // src/pages/AuthPage.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LoginForm from "../components/Login";
 import RegisterForm from "../components/Register";
 
@@ -8,6 +8,10 @@ export default function AuthPage({ onLogin }) {
 
   const switchToRegister = () => setIsLogin(false);
   const switchToLogin = () => setIsLogin(true);
+
+  useEffect(() => {
+    document.title = isLogin ? "SlateChat | Login" : "SlateChat | Register";
+  }, [isLogin]);
 
   return (
     <div className="auth-page">

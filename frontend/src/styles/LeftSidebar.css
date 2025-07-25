@@ -48,8 +48,10 @@
 }
 
 .search-container {
+  position: relative;
   padding: 15px;
   border-bottom: 1px solid #e0e0e0;
+  z-index: 2;
 }
 
 .search-bar {
@@ -75,11 +77,55 @@
   color: #777777;
 }
 
+.search-dropdown {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 48px; /* Adjust if needed to match your search bar height */
+  z-index: 10;
+  pointer-events: auto;
+}
+
+.search-dropdown-centered {
+  left: 50%;
+  transform: translateX(-50%);
+  width: 85%;
+  min-width: 220px;
+  max-width: 340px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+  max-height: 320px;
+  overflow-y: auto;
+  margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+  .search-dropdown-centered {
+    width: 98%;
+    min-width: 0;
+    left: 1%;
+    transform: none;
+  }
+}
+
+.search-dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.search-dropdown-item:hover {
+  background: #f5f5f5;
+}
+
 .search-status {
-  padding: 20px 0;
+  padding: 16px;
   text-align: center;
   color: #888;
-  font-size: 15px;
 }
 
 .chat-list {
@@ -119,21 +165,57 @@
 }
 
 .chat-info {
-  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.chat-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
 }
 
 .chat-name {
   font-weight: 600;
   color: #444444;
-  margin-bottom: 3px;
+  font-size: 15px;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-preview-time {
+  font-size: 12px;
+  color: #888;
+  text-align: right;
+  min-width: 60px;
+  margin-left: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .chat-preview {
   font-size: 13px;
-  color: #777777;
+  color: #888;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.chat-preview-date {
+  font-size: 12px;
+  color: #888;
+  text-align: right;
+  min-width: 60px;
+  margin-left: 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: flex-end;
 }
 
 .logout-container {
@@ -155,4 +237,22 @@
 
 .logout-btn:hover {
   background-color: #333333;
+}
+
+.search-timer-bar {
+  width: 90%;
+  height: 5px;
+  background: #f0f0f0;
+  border-radius: 3px;
+  margin: 8px auto 4px auto;
+  overflow: hidden;
+  position: relative;
+}
+
+.search-timer-bar-inner {
+  height: 100%;
+  background: #555555;
+  border-radius: 3px;
+  transition: width 0.1s linear;
+  will-change: width;
 }

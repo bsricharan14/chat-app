@@ -60,6 +60,9 @@ io.on("connection", (socket) => {
     );
   });
 
+  // Emit the current online users to the newly connected client
+  socket.emit("onlineUsers", Array.from(onlineUsers.keys()));
+
   socket.on("disconnect", () => {
     const { userId } = socket;
     if (userId && onlineUsers.has(userId)) {
@@ -131,7 +134,7 @@ io.on("connection", (socket) => {
       // Mark messages as deleted
       await Message.updateMany(
         { _id: { $in: messageIds } },
-        { $set: { content: "[ deleted message ]" } }
+        { $set: { content: "[ deleted message ]", deleted: true, edited: false } }
       );
       // Notify both users to update their UI
       io.to(userId).emit("messagesDeleted", { messageIds });
@@ -147,6 +150,14 @@ io.on("connection", (socket) => {
   });
   socket.on("stopTyping", ({ to, from }) => {
     io.to(to).emit("stopTyping", { from });
+  });
+
+  socket.on("editMessage", (msg) => {
+    // msg should contain at least: _id, sender, receiver, content, edited, timestamp
+    if (msg.sender && msg.receiver) {
+      io.to(msg.sender.toString()).emit("editMessage", msg);
+      io.to(msg.receiver.toString()).emit("editMessage", msg);
+    }
   });
 });
 

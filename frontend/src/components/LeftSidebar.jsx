@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useChat } from "../contexts/ChatContext";
 import { useAuth } from "../contexts/AuthContext";
 import { useSocket } from "../contexts/SocketContext";
@@ -10,6 +10,10 @@ const LeftSidebar = ({ isCollapsed, toggleSidebar }) => {
   const [search, setSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [searching, setSearching] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showNoResults, setShowNoResults] = useState(false);
+  const [timerPercent, setTimerPercent] = useState(100);
+  const timerRef = useRef();
   const { setSelectedChat } = useChat();
   const { user, setUser } = useAuth();
   const [recentChats, setRecentChats] = useState([]);
@@ -63,14 +67,16 @@ const LeftSidebar = ({ isCollapsed, toggleSidebar }) => {
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!search.trim()) return;
+    if (!search.trim()) {
+      setShowDropdown(false);
+      return;
+    }
     setSearching(true);
+    setShowDropdown(true);
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(
-        `${
-          process.env.REACT_APP_API_URL
-        }/api/left/search?query=${encodeURIComponent(search)}`,
+        `${process.env.REACT_APP_API_URL}/api/left/search?query=${encodeURIComponent(search)}`,
         {
           headers: {
             "Content-Type": "application/json",
@@ -80,11 +86,47 @@ const LeftSidebar = ({ isCollapsed, toggleSidebar }) => {
       );
       const data = await res.json();
       setSearchResults(data);
+      if (Array.isArray(data) && data.length === 0) {
+        setShowNoResults(true);
+        setTimerPercent(100);
+      }
     } catch (err) {
       setSearchResults([]);
+      setShowNoResults(true);
+      setTimerPercent(100);
     } finally {
       setSearching(false);
     }
+  };
+
+  // Timer effect for "No results found"
+  useEffect(() => {
+    if (!showNoResults) return;
+    setTimerPercent(100);
+    const duration = 1500;
+    const interval = 30; // ms
+    let elapsed = 0;
+
+    const timer = setInterval(() => {
+      elapsed += interval;
+      const percent = Math.max(0, 100 - (elapsed / duration) * 100);
+      setTimerPercent(percent);
+      if (elapsed >= duration) {
+        setShowNoResults(false);
+        setShowDropdown(false);
+        clearInterval(timer);
+      }
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [showNoResults]);
+
+  // Hide dropdown when clicking a user
+  const handleSelectUser = (user) => {
+    setActiveChat(user.username);
+    setSelectedChat(user);
+    setShowDropdown(false);
+    setSearch(""); // Optionally clear search input
   };
 
   const handleLogout = () => {
@@ -146,12 +188,22 @@ const LeftSidebar = ({ isCollapsed, toggleSidebar }) => {
             </div>
           )}
           <div className="search-container">
-            <form className="search-bar" onSubmit={handleSearch}>
+            <form className="search-bar" onSubmit={handleSearch} autoComplete="off">
               <input
                 type="text"
                 placeholder="Search chats..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  if (e.target.value.trim() === "") {
+                    setShowDropdown(false);
+                    setSearchResults([]);
+                    setShowNoResults(false);
+                  }
+                }}
+                onFocus={() => {
+                  if (search.trim()) setShowDropdown(true);
+                }}
               />
               <button type="submit">
                 <svg
@@ -165,62 +217,106 @@ const LeftSidebar = ({ isCollapsed, toggleSidebar }) => {
                 </svg>
               </button>
             </form>
+            {/* Search Dropdown - always outside chat-list */}
+            {showDropdown && (
+              <div className="search-dropdown search-dropdown-centered">
+                {searching ? (
+                  <div className="search-status">Searching...</div>
+                ) : showNoResults ? (
+                  <>
+                    <div className="search-status">No results found</div>
+                    <div className="search-timer-bar">
+                      <div
+                        className="search-timer-bar-inner"
+                        style={{ width: `${timerPercent}%` }}
+                      />
+                    </div>
+                  </>
+                ) : searchResults.length > 0 ? (
+                  searchResults.map((user) => {
+                    const recent = recentChats.find(
+                      (rc) => rc.user._id === user._id && rc.latestMessage
+                    );
+                    return (
+                      <div
+                        key={user._id}
+                        className="search-dropdown-item"
+                        onClick={() => handleSelectUser(user)}
+                      >
+                        <div className="chat-avatar">
+                          {user.username.slice(0, 2).toUpperCase()}
+                        </div>
+                        <div className="chat-info">
+                          <div className="chat-name">{user.username}</div>
+                          {recent && recent.latestMessage ? (
+                            <div className="chat-preview" title={recent.latestMessage.content}>
+                              {recent.latestMessage.content.length > 30
+                                ? recent.latestMessage.content.slice(0, 30) + "..."
+                                : recent.latestMessage.content}
+                            </div>
+                          ) : null}
+                        </div>
+                      </div>
+                    );
+                  })
+                ) : null}
+              </div>
+            )}
           </div>
           <div className="chat-list">
-            {search ? (
-              searching ? (
-                <div className="search-status">Searching...</div>
-              ) : searchResults.length > 0 ? (
-                searchResults.map((user) => (
+            {Array.isArray(recentChats) && recentChats.filter(rc => rc.latestMessage).length > 0 ? (
+              recentChats
+                .filter(({ latestMessage }) => !!latestMessage)
+                .map(({ user: chatUser, latestMessage }) => (
                   <div
-                    key={user._id}
-                    className="chat-item"
+                    key={chatUser._id}
+                    className={`chat-item ${activeChat === chatUser.username ? "active" : ""}`}
                     onClick={() => {
-                      setActiveChat(user.username);
-                      setSelectedChat(user);
+                      setActiveChat(chatUser.username);
+                      setSelectedChat(chatUser);
                     }}
                   >
                     <div className="chat-avatar">
-                      {user.username.slice(0, 2).toUpperCase()}
+                      {chatUser.username.slice(0, 2).toUpperCase()}
                     </div>
                     <div className="chat-info">
-                      <div className="chat-name">{user.username}</div>
-                      <div className="chat-preview">{user.email}</div>
+                      <div className="chat-info-row">
+                        <div className="chat-name">{chatUser.username}</div>
+                        <div className="chat-preview-time">
+                          {latestMessage?.timestamp &&
+                            new Date(latestMessage.timestamp).toLocaleTimeString([], {
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              hour12: true,
+                            })}
+                        </div>
+                      </div>
+                      <div className="chat-info-row">
+                        <div className="chat-preview" title={latestMessage?.content || ""}>
+                          {latestMessage?.content
+                            ? latestMessage.content.length > 30
+                              ? latestMessage.content.slice(0, 30) + "..."
+                              : latestMessage.content
+                            : ""}
+                        </div>
+                        <div className="chat-preview-date">
+                          {latestMessage?.timestamp &&
+                            (() => {
+                              const d = new Date(latestMessage.timestamp);
+                              return `${String(d.getDate()).padStart(2, "0")}/${String(
+                                d.getMonth() + 1
+                              ).padStart(2, "0")}/${d.getFullYear()}`;
+                            })()}
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))
-              ) : (
-                <div className="search-status">No results</div>
-              )
-            ) : Array.isArray(recentChats) && recentChats.length > 0 ? (
-              recentChats.map(({ user: chatUser, latestMessage }) => (
-                <div
-                  key={chatUser._id}
-                  className={`chat-item ${
-                    activeChat === chatUser.username ? "active" : ""
-                  }`}
-                  onClick={() => {
-                    setActiveChat(chatUser.username);
-                    setSelectedChat(chatUser);
-                  }}
-                >
-                  <div className="chat-avatar">
-                    {chatUser.username.slice(0, 2).toUpperCase()}
-                  </div>
-                  <div className="chat-info">
-                    <div className="chat-name">{chatUser.username}</div>
-                    <div className="chat-preview" title={latestMessage?.content || ""}>
-                      {latestMessage?.content
-                        ? latestMessage.content.length > 30
-                          ? latestMessage.content.slice(0, 30) + "..."
-                          : latestMessage.content
-                        : ""}
-                    </div>
-                  </div>
-                </div>
-              ))
             ) : (
-              <div className="search-status">No recent chats</div>
+              <div className="search-status">
+                Start chatting to see recent chats here.<br />
+                Use the search above to find users and start a conversation.
+              </div>
             )}
           </div>
           <div className="logout-container">

@@ -92,7 +92,7 @@ export default function LoginForm({ switchToRegister, onLogin }) {
         </button>
 
         <div className="toggle-auth">
-          New to our chat?{" "}
+          New to SlateChat?{" "}
           <button type="button" onClick={switchToRegister}>
             Create an account
           </button>

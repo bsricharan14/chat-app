@@ -14,9 +14,17 @@ dotenv.config();
 // Connect to MongoDB
 connectDB();
 
+const allowedOrigins = [
+  "https://<your-frontend-domain>.onrender.com", // Replace with your deployed frontend URL
+  "http://localhost:3000"
+];
+
 // Setup Express
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+}));
 app.use(express.json());
 
 // Routes: only authentication for now
@@ -33,7 +41,7 @@ app.get("/", (req, res) => {
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*", // Adjust for production
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
   },
 });

@@ -15,7 +15,7 @@ dotenv.config();
 connectDB();
 
 const allowedOrigins = [
-  "https://<your-frontend-domain>.onrender.com", // Replace with your deployed frontend URL
+  "https://chat-app-frontend-tc6y.onrender.com", // Replace with your deployed frontend URL
   "http://localhost:3000"
 ];
 

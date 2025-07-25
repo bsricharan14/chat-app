@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const router = express.Router();
 const User = require("../models/User");
 const auth = require("../middleware/authmiddleware");
+const { getIO } = require("../socket"); // We'll create this helper
 require("dotenv").config();
 
 // Helper to generate JWT
@@ -98,6 +99,13 @@ router.delete("/delete-account", auth, async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
     await user.deleteOne();
+
+    // Emit forceLogout to all sockets of this user
+    const io = getIO();
+    if (io) {
+      io.to(user._id.toString()).emit("forceLogout");
+    }
+
     res.json({ message: "Account deleted" });
   } catch (err) {
     console.error("Delete account error:", err);

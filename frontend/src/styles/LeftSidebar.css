@@ -162,6 +162,8 @@
   margin-right: 10px;
   color: white;
   font-weight: bold;
+  font-size: 18px;
+  overflow: hidden;
 }
 
 .chat-info {

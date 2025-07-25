@@ -293,11 +293,20 @@ const LeftSidebar = ({ isCollapsed, toggleSidebar }) => {
                       </div>
                       <div className="chat-info-row">
                         <div className="chat-preview" title={latestMessage?.content || ""}>
-                          {latestMessage?.content
-                            ? latestMessage.content.length > 30
-                              ? latestMessage.content.slice(0, 30) + "..."
-                              : latestMessage.content
-                            : ""}
+                          {latestMessage?.sender === user._id && latestMessage?.content
+                            ? (
+                                <>
+                                  <span style={{ color: "#888", fontWeight: 500 }}>you: </span>
+                                  {latestMessage.content.length > 30
+                                    ? latestMessage.content.slice(0, 30) + "..."
+                                    : latestMessage.content}
+                                </>
+                              )
+                            : latestMessage?.content
+                              ? latestMessage.content.length > 30
+                                ? latestMessage.content.slice(0, 30) + "..."
+                                : latestMessage.content
+                              : ""}
                         </div>
                         <div className="chat-preview-date">
                           {latestMessage?.timestamp &&

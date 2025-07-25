@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const router = express.Router();
 const User = require("../models/User");
 const auth = require("../middleware/authmiddleware");
-const { getIO } = require("../socket"); // We'll create this helper
+const { getIO } = require("../socket");
 require("dotenv").config();
 
 // Helper to generate JWT

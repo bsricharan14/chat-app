@@ -1,212 +1,387 @@
-/* src/styles/auth.css */
+/* ===== CSS VARIABLES ===== */
+:root {
+  /* Colors - Gray Palette */
+  --color-primary: #444444;
+  --color-primary-hover: #333333;
+  --color-text: #2d3748;
+  --color-text-muted: #718096;
+  --color-background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+  --color-surface: #ffffff;
+  --color-border: #e2e8f0;
+  --color-error: #e53e3e;
+  --color-success: #38a169;
+  
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-2xl: 1.875rem;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  
+  /* Effects */
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --shadow-focus: 0 0 0 3px rgba(68, 68, 68, 0.1);
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-/* Reset and global box-sizing */
-*,
-*::before,
-*::after {
+/* ===== RESET ===== */
+*, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
-/* Base layout */
+body {
+  font-family: var(--font-family);
+  line-height: 1.6;
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+/* ===== LAYOUT ===== */
+.auth-page {
+  min-height: 100vh;
+  background: var(--color-background);
+  position: relative;
+}
+
+.auth-page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(68, 68, 68, 0.1) 0%, transparent 50%);
+  opacity: 0.5;
+}
+
 .auth-container {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background-color: #f0f0f0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  padding: 1rem;
+  padding: var(--space-md);
+  position: relative;
+  z-index: 1;
 }
 
-/* Card wrapper */
 .auth-form {
-  background: #ffffff;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: var(--space-2xl);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-xl);
   width: 100%;
-  max-width: 480px;
-  /* Removed fixed min-height to allow form to size naturally with content */
-  /* min-height: 400px; */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 1.4rem;
-  transition: transform 0.3s ease-out;
+  max-width: 580px;
+  animation: fadeInUp 0.6s ease-out;
+  transition: all var(--transition);
 }
 
-/* Optional: if you find hover lift jarring on mobile, you can comment this out */
 .auth-form:hover {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
 }
 
-/* Header */
+/* ===== HEADER ===== */
 .auth-header {
   text-align: center;
+  margin-bottom: var(--space-2xl);
 }
 
 .auth-header .chat-icon {
-  width: 50px;
-  height: 50px;
-  margin: 0 auto 1rem;
-  fill: #444444;
+  width: 60px;
+  height: 60px;
+  margin: 0 auto var(--space-lg);
+  padding: var(--space-md);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #555555 100%);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  animation: float 3s ease-in-out infinite;
+  transition: all var(--transition);
 }
 
-/* Floating-label fields */
+.auth-header .chat-icon svg {
+  width: 100%;
+  height: 100%;
+  fill: white;
+}
+
+.auth-header .chat-icon:hover {
+  transform: scale(1.05);
+}
+
+.auth-header h1 {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.auth-header p {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ===== FORM GROUPS ===== */
 .form-group {
   position: relative;
-  /* Add bottom margin so error messages do not overlap next field */
-  margin-bottom: 1.5rem;
+  margin-bottom: var(--space-xl);
 }
 
 .form-group input {
   width: 100%;
-  padding: 0.85rem 1rem;
-  border: 1px solid #777777;
-  border-radius: 6px;
-  font-size: 1rem;
-  color: #333333;
-  background-color: #ffffff;
-  transition: border-color 0.4s, background-color 0.4s;
+  padding: var(--space-lg);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  transition: all var(--transition);
+  outline: none;
 }
 
-/* Hide placeholder text but use placeholder-shown for floating label logic */
 .form-group input::placeholder {
   color: transparent;
 }
 
-/* Focus state */
 .form-group input:focus {
-  outline: none;
-  border-color: #555555;
-  background-color: #ffffff;
-  box-shadow: 0 0 0 3px rgba(85, 85, 85, 0.2);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-focus);
+  transform: translateY(-2px);
 }
 
-/* Floating label styling */
+/* ===== FLOATING LABELS ===== */
 .form-group label {
   position: absolute;
-  top: 12px;
-  left: 14px;
-  font-size: 0.9rem;
-  color: #444444;
+  top: var(--space-lg);
+  left: var(--space-lg);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-muted);
   pointer-events: none;
-  transition: top 0.4s, left 0.4s, font-size 0.4s, color 0.4s;
-  background-color: #ffffff; /* Cover input border behind label */
-  padding: 0 0.25rem; /* Small horizontal padding */
-  z-index: 2; /* Place above input */
+  transition: all var(--transition);
+  z-index: 2;
 }
 
-/* When input is focused or has content, float the label up */
 .form-group input:focus + label,
 .form-group input:not(:placeholder-shown) + label {
-  top: -8px;
-  left: 12px;
-  font-size: 0.75rem;
-  color: #555555;
+  top: -14px;
+  left: var(--space-lg);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-primary);
+  background-color: var(--color-surface);
+  padding: 0 var(--space-sm);
+  box-shadow: 0 0 0 2px var(--color-surface);
 }
 
-/* Password toggle */
+/* ===== PASSWORD TOGGLE ===== */
 .password-toggle {
   position: absolute;
-  right: 12px;
+  right: var(--space-lg);
   top: 50%;
   transform: translateY(-50%);
-  font-size: 0.9rem;
-  color: #444444;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-muted);
   cursor: pointer;
   user-select: none;
-  transition: color 0.3s;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  transition: all var(--transition);
+  z-index: 3;
 }
 
 .password-toggle:hover {
-  color: #222222;
+  color: var(--color-primary);
+  background-color: rgba(68, 68, 68, 0.1);
 }
 
-/* Buttons */
+/* ===== BUTTONS ===== */
 .submit-btn {
   width: 100%;
-  padding: 0.85rem;
-  background-color: #444444;
-  color: #ffffff;
+  padding: var(--space-lg);
+  background: linear-gradient(135deg, var(--color-primary) 0%, #555555 100%);
+  color: var(--color-surface);
   border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 600;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-md);
+  margin-top: var(--space-lg); /* Added margin to separate from error messages */
 }
 
 .submit-btn:hover:not(:disabled) {
-  background-color: #333333;
-  transform: translateY(-1px);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
+  background: linear-gradient(135deg, var(--color-primary-hover) 0%, var(--color-primary) 100%);
 }
 
 .submit-btn:disabled {
-  background-color: #666666;
+  background: var(--color-text-muted);
   cursor: not-allowed;
+  transform: none;
 }
 
-/* Error & Success Messages */
-/* 
-   Instead of negative margins, use a positive margin below the input.
-   .error-message is designed to appear under its input.
-*/
+/* ===== MESSAGES ===== */
 .error-message {
-  color: #e74c3c; /* a clearer red for errors */
-  font-size: 0.85rem;
-  margin-top: 0.25rem; /* small spacing from input */
-  /* ensure it takes full width if needed */
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  margin-top: var(--space-sm);
+  margin-bottom: var(--space-lg); /* Added bottom margin to separate from submit button */
+  padding: var(--space-sm) var(--space-md);
+  background-color: rgba(229, 62, 62, 0.1);
+  border: 1px solid rgba(229, 62, 62, 0.2);
+  border-radius: var(--radius-md);
+  animation: shake 0.5s ease-in-out;
 }
 
-/* If you want to highlight the input border when there is an error,
-   you can add a class "error" on .form-group in JSX, e.g. <div className={`form-group ${errors.field ? 'error' : ''}`}> 
-*/
+.success-message {
+  color: var(--color-success);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  margin: var(--space-md) 0;
+  padding: var(--space-md);
+  background-color: rgba(56, 161, 105, 0.1);
+  border: 1px solid rgba(56, 161, 105, 0.2);
+  border-radius: var(--radius-md);
+}
+
+/* ===== ERROR STATES ===== */
 .form-group.error input {
-  border-color: #e74c3c;
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.1);
+  animation: shake 0.5s ease-in-out;
 }
 
 .form-group.error label {
-  color: #e74c3c;
+  color: var(--color-error);
 }
 
-/* Success message (e.g., “Account created!”) */
-.success-message {
-  color: #0a7f2b;
-  font-size: 0.9rem;
-  text-align: center;
-  margin-top: 0.5rem;
-}
-
-/* Switch auth */
+/* ===== AUTH TOGGLE ===== */
 .toggle-auth {
   text-align: center;
-  font-size: 0.9rem;
-  color: #444444;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin-top: var(--space-xl);
 }
 
 .toggle-auth button {
   background: none;
   border: none;
-  color: #444444;
+  color: var(--color-primary);
   cursor: pointer;
-  font-weight: 600;
-  transition: color 0.3s;
+  font-weight: var(--font-weight-semibold);
+  font-size: inherit;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-md);
+  transition: all var(--transition);
+  position: relative;
 }
 
 .toggle-auth button:hover {
-  color: #222222;
+  color: var(--color-primary-hover);
+  background-color: rgba(68, 68, 68, 0.1);
+  transform: translateY(-1px);
 }
 
-/* Responsive */
-@media (max-width: 600px) {
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+  .auth-container {
+    padding: var(--space-sm);
+  }
+  
   .auth-form {
+    padding: var(--space-xl);
     max-width: 90%;
-    padding: 1.5rem;
   }
+  
   .auth-header h1 {
-    font-size: 1.5rem;
+    font-size: var(--font-size-lg);
   }
+  
+  .auth-header .chat-icon {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-form {
+    padding: var(--space-lg);
+    max-width: 95%;
+  }
+  
+  .form-group {
+    margin-bottom: var(--space-lg);
+  }
+  
+  .submit-btn {
+    padding: var(--space-md);
+    font-size: var(--font-size-base);
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.submit-btn:focus-visible,
+.toggle-auth button:focus-visible,
+.password-toggle:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ===== VALIDATION STATES ===== */
+.form-group input:valid:not(:placeholder-shown) {
+  border-color: var(--color-success);
+}
+
+.form-group input:valid:not(:placeholder-shown) + label {
+  color: var(--color-success);
 }

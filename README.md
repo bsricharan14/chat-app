@@ -1,42 +1,39 @@
 # SlateChat
 
-[![Project Status](https://img.shields.io/badge/status-work__in__progress-orange)](https://github.com/yourusername/slatechat)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-
-> **SlateChat** is a modern, real-time chat application built with the MERN stack and Socket.IO. It offers secure user authentication, live messaging, AI-powered chat features, and a responsive, user-friendly interface.
+SlateChat is a modern, real-time chat application built with the MERN stack and Socket.IO. It offers secure user authentication, live messaging, AI-powered chat features, and a responsive, user-friendly interface.
 
 ---
 
 ## 📋 Table of Contents
 
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Getting Started](#-getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Environment Variables](#environment-variables)
-  - [Running the Application](#running-the-application)
-- [Usage](#-usage)
-- [Folder Structure](#-folder-structure)
-- [Contributing](#-contributing)
-- [License](#-license)
-- [Acknowledgements](#-acknowledgements)
+* [Features](#-features)
+* [Tech Stack](#-tech-stack)
+* [Getting Started](#-getting-started)
+
+  * [Prerequisites](#prerequisites)
+  * [Installation](#installation)
+  * [Environment Variables](#environment-variables)
+  * [Running the Application](#running-the-application)
+* [Usage](#-usage)
+* [Folder Structure](#-folder-structure)
+* [License](#-license)
+* [Acknowledgements](#-acknowledgements)
 
 ---
 
 ## 🚀 Features
 
-- **User Authentication**: Register and log in with JWT-based sessions.
-- **Real-Time Chatting**: One-to-one chat powered by Socket.IO for instant message delivery.
-- **Online/Offline Indicators**: See who’s available at a glance.
-- **Read Receipts**: Know when your messages have been seen.
-- **Message Deletion**: Delete messages with a `[deleted message]` placeholder.
-- **Date Grouping**: Chats grouped by day with date labels.
-- **Responsive UI**: Optimized for desktop and mobile screens.
-- **Sidebar**: Recent chats list with search functionality.
-- **AI Suggested Replies**: Get instant, context-aware reply suggestions powered by Google Gemini API.
-- **Chat Summarisation**: Summarise selected chat messages using Gemini for quick overviews.
-- **Account Management**: Delete your account and all related messages securely.
+* **User Authentication**: Register and log in with JWT-based sessions.
+* **Real-Time Chatting**: One-to-one chat powered by Socket.IO for instant message delivery.
+* **Online/Offline Indicators**: See who’s available at a glance.
+* **Read Receipts**: Know when your messages have been seen.
+* **Message Deletion**: Delete messages with a `[deleted message]` placeholder.
+* **Date Grouping**: Chats grouped by day with date labels.
+* **Responsive UI**: Optimized for desktop and mobile screens.
+* **Sidebar**: Recent chats list with search functionality.
+* **AI Suggested Replies**: Get instant, context-aware reply suggestions powered by Google Gemini API.
+* **Chat Summarisation**: Summarise selected chat messages using Gemini for quick overviews.
+* **Account Management**: Delete your account and all related messages securely.
 
 ---
 
@@ -59,8 +56,8 @@ Follow these steps to get SlateChat running locally.
 
 ### Prerequisites
 
-- **Node.js** v18 or higher
-- **MongoDB** (local instance or Atlas cluster)
+* **Node.js** v18 or higher
+* **MongoDB** (local instance or Atlas cluster)
 
 ### Installation
 
@@ -87,7 +84,7 @@ Follow these steps to get SlateChat running locally.
 
 Create a `.env` file in the `backend` and `frontend` directories with the following values:
 
-- **backend/.env**
+* **backend/.env**
 
   ```dotenv
   MONGO_URI=mongodb://localhost:27017/chat-app
@@ -96,7 +93,7 @@ Create a `.env` file in the `backend` and `frontend` directories with the follow
   GEMINI_API_KEY=your_gemini_api_key
   ```
 
-- **frontend/.env**
+* **frontend/.env**
 
   ```dotenv
   REACT_APP_API_URL=http://localhost:5000
@@ -158,20 +155,6 @@ slatechat/
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch: `git checkout -b feature/YourFeatureName`.
-3. Commit your changes: `git commit -m 'Add some feature'`.
-4. Push to the branch: `git push origin feature/YourFeatureName`.
-5. Open a Pull Request.
-
-Please ensure your code follows the project’s coding conventions and includes relevant tests.
-
----
-
 ## 📜 License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
@@ -180,13 +163,16 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## 🙏 Acknowledgements
 
-- [Create React App](https://github.com/facebook/create-react-app)
-- [Socket.IO](https://socket.io/)
-- [MongoDB](https://www.mongodb.com/)
-- [Express](https://expressjs.com/)
-- [Mongoose](https://mongoosejs.com/)
-- [Google Gemini API](https://ai.google.dev/)
+* [Create React App](https://github.com/facebook/create-react-app)
+* [Socket.IO](https://socket.io/)
+* [MongoDB](https://www.mongodb.com/)
+* [Express](https://expressjs.com/)
+* [Mongoose](https://mongoosejs.com/)
+* [Google Gemini API](https://ai.google.dev/)
+* Some parts of this project were developed with the help of **GitHub Copilot** and other **AI-assisted tools** for learning and exploration purposes.
 
 ---
 
-_Work in progress — new features and improvements coming soon!_
+*Work in progress — new features and improvements coming soon!*
+
+---

@@ -2,14 +2,20 @@
 
 SlateChat is a modern, real-time chat application built with the MERN stack and Socket.IO. It offers secure user authentication, live messaging, AI-powered chat features, and a responsive, user-friendly interface.
 
+<p align="center">
+  <a href="https://chat-app-frontend-tc6y.onrender.com" target="_blank">
+    <strong>🚀 Live Demo</strong>
+  </a>
+</p>
+
 ---
 
 ## 📋 Table of Contents
 
 * [Features](#-features)
+* [Screenshots](#-screenshots)
 * [Tech Stack](#-tech-stack)
 * [Getting Started](#-getting-started)
-
   * [Prerequisites](#prerequisites)
   * [Installation](#installation)
   * [Environment Variables](#environment-variables)
@@ -37,6 +43,17 @@ SlateChat is a modern, real-time chat application built with the MERN stack and 
 
 ---
 
+## 📸 Screenshots
+
+<table>
+  <tr>
+    <td><img src="assets/login.png" alt="login page"></td>
+    <td><img src="assets/mainchat.png" alt="main chat page"></td>
+  </tr>
+</table>
+
+---
+
 ## 🛠 Tech Stack
 
 | Layer          | Technologies                        |
@@ -46,7 +63,7 @@ SlateChat is a modern, real-time chat application built with the MERN stack and 
 | Real-time      | Socket.IO                           |
 | AI Integration | Google Gemini API                   |
 | Authentication | JSON Web Tokens (JWT)               |
-| Deployment     | Yet to be done                      |
+| Deployment     | Render                              |
 
 ---
 
